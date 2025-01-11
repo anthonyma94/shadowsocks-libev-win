@@ -2,14 +2,17 @@ on:
   push:
     branches:
       - master
-  workflow_dispatch:
+  schedule:
+    - cron: 0 0 * * *
+  workflow_dispatch: # Allows manual triggering of the workflow
+
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x86, x86_64]
-        toolchain: [cygwin, mingw]
+        arch: [x86_64]
+        toolchain: [cygwin]
         include:
           - arch: x86
             toolchain: mingw
@@ -44,5 +47,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: shadowsocks-libev-${{ matrix.toolchain }}-${{ matrix.arch }}
-          path: |
-            shadowsocks-libev/build/dst
+          path: ${{ runner.temp }}/shadowsocks-builds/* # Adjusted path to match $HOME
