@@ -27,7 +27,7 @@ eval cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo $cmake_args
 make
 
 mkdir dst
-cp shared/bin/* lib/libshadowsocks-libev.dll.a  bin/*.dll ../src/shadowsocks.h ../LICENSE dst
+cp shared/bin/* lib/libshadowsocks-libev.dll.a bin/*.dll ../src/shadowsocks.h ../LICENSE dst
 cd dst
 if [[ "$TOOLCHAIN" == 'cygwin' ]]; then
 	bin_prefix='\/usr\/bin\/'
@@ -54,12 +54,14 @@ fi
 
 tar czf binaries.tar.gz *
 
-if [ "$GITHUB_REF" = refs/heads/master ]; then
-	mkdir -p ~/.ssh
-	echo $DEPLOYKEY | base64 -d > ~/.ssh/id_ed25519
-	chmod 600 ~/.ssh/id_ed25519
-	ssh-keyscan web.sourceforge.net > ~/.ssh/known_hosts
-	scp \
-		binaries.tar.gz \
-		ddosolitary@web.sourceforge.net:/home/project-web/ddosolitary-builds/htdocs/shadowsocks-libev-win/shadowsocks-libev-$TOOLCHAIN-$ARCH.tar.gz
-fi
+# Save the build artifacts locally
+LOCAL_OUTPUT_DIR="$HOME/shadowsocks-builds"
+
+# Create the local directory if it doesn't exist
+mkdir -p "$LOCAL_OUTPUT_DIR"
+
+# Copy the tarball to the local directory
+cp binaries.tar.gz "$LOCAL_OUTPUT_DIR/shadowsocks-libev-$TOOLCHAIN-$ARCH.tar.gz"
+
+# Print a success message
+echo "Build artifacts have been saved to $LOCAL_OUTPUT_DIR/shadowsocks-libev-$TOOLCHAIN-$ARCH.tar.gz"
