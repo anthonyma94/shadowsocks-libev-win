@@ -52,16 +52,17 @@ if [[ "$TOOLCHAIN" == 'mingw' ]]; then
 	echo "$script" | ar -M
 fi
 
+# Save final binaries in the `dst` directory
 tar czf binaries.tar.gz *
 
-# Save the build artifacts locally
-LOCAL_OUTPUT_DIR="$HOME/shadowsocks-builds"
+# Define a Windows-accessible directory (on the D: drive)
+WINDOWS_OUTPUT_DIR="/cygdrive/d/shadowsocks-builds"
 
-# Create the local directory if it doesn't exist
-mkdir -p "$LOCAL_OUTPUT_DIR"
+# Create the directory if it doesn't exist
+mkdir -p "$WINDOWS_OUTPUT_DIR"
 
-# Copy the tarball to the local directory
-cp binaries.tar.gz "$LOCAL_OUTPUT_DIR/shadowsocks-libev-$TOOLCHAIN-$ARCH.tar.gz"
+# Copy the final tarball to the Windows-accessible directory
+cp binaries.tar.gz "$WINDOWS_OUTPUT_DIR/shadowsocks-libev-$TOOLCHAIN-$ARCH.tar.gz"
 
 # Print a success message
-echo "Build artifacts have been saved to $LOCAL_OUTPUT_DIR/shadowsocks-libev-$TOOLCHAIN-$ARCH.tar.gz"
+echo "Build artifacts have been saved to $WINDOWS_OUTPUT_DIR/shadowsocks-libev-$TOOLCHAIN-$ARCH.tar.gz"

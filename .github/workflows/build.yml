@@ -8,43 +8,25 @@ on:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        arch: [x86_64]
-        toolchain: [cygwin]
-        include:
-          - arch: x86
-            toolchain: mingw
-            msystem: MINGW32
-          - arch: x86_64
-            toolchain: mingw
-            msystem: MINGW64
     runs-on: windows-2019
     env:
-      ARCH: ${{ matrix.arch }}
-      TOOLCHAIN: ${{ matrix.toolchain }}
+      ARCH: x86_64
+      TOOLCHAIN: cygwin
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@master
       - shell: powershell
-        if: ${{ matrix.toolchain == 'cygwin' }}
         run: |
-          Invoke-WebRequest -Uri https://cygwin.com/setup-${{ matrix.arch }}.exe -OutFile cygwin.exe
+          # Download and install Cygwin
+          Invoke-WebRequest -Uri https://cygwin.com/setup-${{ env.ARCH }}.exe -OutFile cygwin.exe
           start -Wait .\cygwin.exe '-qng -R cygwin -s http://cygwin.mirror.constant.com -P git -P curl -P gettext -P gcc-core -P gcc-g++ -P cmake -P make -P libpcre-devel -P libcares-devel -P libev-devel -P libsodium-devel -P mbedtls-devel'
+
+          # Run the build script
           .\cygwin\bin\bash.exe -le (Join-Path (Get-Location) build.sh)
-      - shell: powershell
-        if: ${{ matrix.toolchain == 'mingw' }}
-        env:
-          MSYSTEM: ${{ matrix.msystem }}
-        run: |
-          $ErrorActionPreference = 'Continue'
-          C:\msys64\usr\bin\bash.exe -l -c 'pacman -Syu --noconfirm --noprogressbar'
-          C:\msys64\usr\bin\bash.exe -l -c 'pacman -Syu --needed --noconfirm --noprogressbar base-devel git $MINGW_PACKAGE_PREFIX-{toolchain,cmake,pcre,c-ares,libsodium,mbedtls,ntldd,autotools}'
-          C:\msys64\usr\bin\bash.exe -le (Join-Path (Get-Location) build.sh)
+
       # Upload compiled binaries as artifacts
       - name: Upload binaries
         uses: actions/upload-artifact@v3
         with:
-          name: shadowsocks-libev-${{ matrix.toolchain }}-${{ matrix.arch }}
-          path: ${{ runner.temp }}/shadowsocks-builds/* # Adjusted path to match $HOME
+          name: shadowsocks-libev-${{ env.TOOLCHAIN }}-${{ env.ARCH }}
+          path: D:\shadowsocks-builds\shadowsocks-libev-${{ env.TOOLCHAIN }}-${{ env.ARCH }}.tar.gz
